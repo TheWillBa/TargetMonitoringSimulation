@@ -2,8 +2,8 @@ import java.util.Arrays;
 
 public abstract class AbstractTargetGenerator implements TargetGenerator{
 
-    private final int numEdges; // How circular is the target?
-    private final int targetRadius;
+    protected final int numEdges; // How circular is the target?
+    protected final int targetRadius;
 
     protected AbstractTargetGenerator(int numEdges, int targetRadius){
         this.targetRadius = targetRadius;
