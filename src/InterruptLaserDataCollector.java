@@ -1,28 +1,23 @@
 public class InterruptLaserDataCollector extends AbstractLaserDataCollector{
-    private double targetSpeedMph;
 
     /**
      * Collects the target data each millis as if being dropped through lasers
      * @param numLasers the number of lasers
      * @param spacing the spacing of the lasers
-     * @param targetSpeedMph the speed the targets fly at
      */
-    InterruptLaserDataCollector(int numLasers, int spacing, double targetSpeedMph) {
+    InterruptLaserDataCollector(int numLasers, int spacing) {
         super(numLasers, spacing);
-        this.targetSpeedMph = targetSpeedMph;
-        System.out.println(targetShiftPixels());
     }
 
-    InterruptLaserDataCollector(int numLasers, int spacing, double targetSpeedMph, int x, int y) {
+    InterruptLaserDataCollector(int numLasers, int spacing, int x, int y) {
         super(numLasers, spacing, x, y);
-        this.targetSpeedMph = targetSpeedMph;
     }
 
     /**
      * Calculates the target dropping speed in mm/ms, with a min speed of 1 mm/ms
      * @return the speed in mm/ms
      */
-    private int targetShiftPixels(){
+    private static int targetShiftPixels(int targetSpeedMph){
         int speed =  (int) (targetSpeedMph * 5280 * 12 * 2.54 /* to cm/hr */
                 * 10 /* to mm/hr */
                 * (1.0 / 3600) /* to mm/s*/
@@ -31,23 +26,34 @@ public class InterruptLaserDataCollector extends AbstractLaserDataCollector{
         return speed > 0 ? speed : 1;
     }
 
+    /**
+     * Sets all of the lasers to a given y location
+     * @param y the new y pos
+     */
     private void setLaserPos(int y){
         for(int[] laserPoint : laserPoints){
             laserPoint[1] = y;
         }
     }
 
-    private void shiftLasers(){
+    /**
+     * Adds the given value to the y location of all the lasers
+     * @param a the amount to shift by
+     */
+    private void shiftLasers(int a){
         for(int[] laserPoint : laserPoints){
-            laserPoint[1] += targetShiftPixels();
+            laserPoint[1] += a;
         }
     }
 
     @Override
     public boolean[][] collectDataOnTarget(Target t) {
-        setLaserPos(-150); // TODO deal with magic numbers
-        int numSamples = 300 / targetShiftPixels(); // 300mm is about 1 foot
-        boolean[][] data = new boolean[300][numLasers];
+
+        int laserShiftNum = targetShiftPixels(t.getSpeedMph());
+        int numSamples = 3 * t.getDiameter() / laserShiftNum;
+        setLaserPos(-numSamples * laserShiftNum/2); // TODO deal with magic numbers
+
+        boolean[][] data = new boolean[numSamples][numLasers];
         for(int i = 0; i < numSamples; i++){
             boolean[] current = data[i];
 
@@ -61,9 +67,8 @@ public class InterruptLaserDataCollector extends AbstractLaserDataCollector{
                     }
                 }
             }
-            shiftLasers();
+            shiftLasers(laserShiftNum);
         }
-
         return data;
     }
 }

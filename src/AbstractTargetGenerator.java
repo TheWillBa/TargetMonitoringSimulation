@@ -4,6 +4,7 @@ public abstract class AbstractTargetGenerator implements TargetGenerator{
 
     protected final int numEdges; // How circular is the target?
     protected final int targetRadius;
+    protected final int targetSpeedMph;
 
     /**
      * Creates a target generator for targets with a given amount of edges and
@@ -11,9 +12,10 @@ public abstract class AbstractTargetGenerator implements TargetGenerator{
      * @param numEdges number of edges for the 'circular' target
      * @param targetDiameter the diameter of the target in millimeters
      */
-    protected AbstractTargetGenerator(int numEdges, int targetDiameter){
+    protected AbstractTargetGenerator(int numEdges, int targetDiameter, int targetSpeedMph){
         this.targetRadius = targetDiameter/2;
         this.numEdges = numEdges;
+        this.targetSpeedMph = targetSpeedMph;
     }
 
     @Override
@@ -23,7 +25,7 @@ public abstract class AbstractTargetGenerator implements TargetGenerator{
 
     @Override
     public Target getWholeTarget(int xOrig, int yOrig){
-        Target t = new Target();
+        Target t = new Target(targetSpeedMph, targetRadius*2);
         Piece p = new Piece();
         for(int i = 0; i < numEdges; i++){
             int x = (int) (Math.cos(i * 2 * Math.PI / numEdges) * targetRadius);

@@ -1,9 +1,19 @@
 import java.util.Random;
 
+/**
+ * A target generator that creates broken targets by splitting a whole target into semi-random
+ * quadrants. The numEdges of a target must be divisible by 4.
+ */
 public class RandomQuadrantGenerator extends AbstractTargetGenerator{
 
-    public RandomQuadrantGenerator(int numEdges, int targetDiameter){
-        super(numEdges, targetDiameter);
+
+    /**
+     * Creates a RandomQuadrantGenerator object
+     * @param numEdges the number of edges a target will have; must be divisible by 4
+     * @param targetDiameter the diameter that each target will have in millimeters
+     */
+    public RandomQuadrantGenerator(int numEdges, int targetDiameter, int targetSpeedMph){
+        super(numEdges, targetDiameter, targetSpeedMph);
     }
 
     @Override
@@ -15,7 +25,7 @@ public class RandomQuadrantGenerator extends AbstractTargetGenerator{
     public Target getBrokenTarget(int xOrig, int yOrig) {
         double numPieces = 4.0;
 
-        Target t = new Target();
+        Target t = new Target(targetSpeedMph, targetRadius*2);
         Piece p = new Piece();
         Random rng = new Random();
         int count = 0;

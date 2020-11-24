@@ -4,13 +4,25 @@ import java.util.*;
 
 public class Target {
     private final List<Piece> pieces;
+    private final int speedMph;
+    private final int diameter;
 
-    public Target(){
+    public Target(int speedMph, int diameter){
         pieces = new ArrayList<>();
+        this.speedMph = speedMph;
+        this.diameter = diameter;
     }
 
     public List<Piece> getPieces() {
         return pieces;
+    }
+
+    public int getDiameter() {
+        return diameter;
+    }
+
+    public int getSpeedMph() {
+        return speedMph;
     }
 
     public void addPiece(Piece p){
