@@ -10,4 +10,6 @@ public interface BreakageClassifier {
      * @return true if the target is broken, false if not
      */
     boolean isBroken(Target t);
+
+    // TODO add description functions for documenting purposes and tests? make listable interface?
 }
