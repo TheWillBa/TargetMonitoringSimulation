@@ -3,6 +3,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A class representing a piece of a target.
+ * Essentially a polygon.
+ */
 class Piece {
 
     private final List<Point> points;

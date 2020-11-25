@@ -1,4 +1,7 @@
-public interface LaserDataAnalyzer {
+/**
+ * Something that can classify laser data (a boolean[][]) as broken or not
+ */
+public interface LaserDataAnalyzer extends Listable{
 
     /**
      * Returns true if the data represents a broken target

@@ -1,3 +1,8 @@
+/**
+ * A data analyzer the uses the first algorithm developed during the original provide;
+ * aka, checks for a broken target by assuring that the target hits only a certain number of
+ * consecutive lasers
+ */
 public class BasicLaserDataAnalyzer implements LaserDataAnalyzer{
     //private static final int GOAL_HITS = 3; // later determine by something else?
                                             // add parameters to get more information? (to constructor?)
@@ -62,8 +67,26 @@ public class BasicLaserDataAnalyzer implements LaserDataAnalyzer{
     }
 
 
+    /**
+     * Returns the maximum number of lasers a whole target of a given diameter will hit
+     * with a certain laser spacing.
+     * The min number will be this value minus one.
+     * @param diameter the diameter of the target
+     * @param spacing the spacing of the lasers that the target will pass through
+     * @return the mac number of lasers a whole target will hit
+     */
     private static int maxRequiredNumHitLasers(int diameter, int spacing){
         int max =  (int) Math.round(diameter * 1.0/spacing);
         return max;
+    }
+
+    /**
+     * Gets the name that the listable object should be referred to as
+     *
+     * @return the name of the object
+     */
+    @Override
+    public String getName() {
+        return "Basic consecutive (v1.0)";
     }
 }

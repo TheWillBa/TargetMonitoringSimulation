@@ -2,6 +2,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 
+/**
+ * Represents a clay target as a list of pieces, as well as contains
+ * other target specific information
+ */
 public class Target {
     private final List<Piece> pieces;
     private final int speedMph;

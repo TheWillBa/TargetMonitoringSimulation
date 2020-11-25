@@ -1,5 +1,8 @@
 import java.util.Arrays;
 
+/**
+ * An abstract class that provides default functionality for creating a whole target.
+ */
 public abstract class AbstractTargetGenerator implements TargetGenerator{
 
     protected final int numEdges; // How circular is the target?
@@ -18,11 +21,21 @@ public abstract class AbstractTargetGenerator implements TargetGenerator{
         this.targetSpeedMph = targetSpeedMph;
     }
 
+    /**
+     * Gets a target that should be classified as whole with center (0,0)
+     * @return a representation of a whole target
+     */
     @Override
     public Target getWholeTarget() {
         return getWholeTarget(0, 0);
     }
 
+    /**
+     * Gets a target that should be classified as whole with center (x, y)
+     * @param xOrig the x center of the target
+     * @param yOrig the y center of the target
+     * @return a representation of a whole target
+     */
     @Override
     public Target getWholeTarget(int xOrig, int yOrig){ // TODO move shift to constructor?
         Target t = new Target(targetSpeedMph, targetRadius*2);
@@ -35,5 +48,14 @@ public abstract class AbstractTargetGenerator implements TargetGenerator{
         }
         t.addPiece(p);
         return t;
+    }
+
+    /**
+     * Gets a broken target centered at (0,0)
+     * @return a broken target
+     */
+    @Override
+    public Target getBrokenTarget(){
+        return getBrokenTarget(0,0);
     }
 }

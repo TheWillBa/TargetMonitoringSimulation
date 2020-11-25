@@ -32,4 +32,14 @@ public class PollingLaserDataCollector extends AbstractLaserDataCollector{
         }
         return data;
     }
+
+    /**
+     * Gets the name that the listable object should be referred to as
+     *
+     * @return the name of the object
+     */
+    @Override
+    public String getName() {
+        return "Polling";
+    }
 }

@@ -16,11 +16,6 @@ public class ManySmallPiecesGenerator extends AbstractTargetGenerator{
     }
 
     @Override
-    public Target getBrokenTarget() {
-        return getBrokenTarget(0 , 0);
-    }
-
-    @Override
     public Target getBrokenTarget(int x, int y) {
         Target t = new Target(targetSpeedMph, targetRadius * 2);
         Random r = new Random();
@@ -41,5 +36,15 @@ public class ManySmallPiecesGenerator extends AbstractTargetGenerator{
             t.addPiece(p);
         }
         return t;
+    }
+
+    /**
+     * Gets the name that the listable object should be referred to as
+     *
+     * @return the name of the object
+     */
+    @Override
+    public String getName() {
+        return "Many Small Pieces";
     }
 }

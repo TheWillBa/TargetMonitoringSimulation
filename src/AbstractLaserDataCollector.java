@@ -81,4 +81,9 @@ public abstract class AbstractLaserDataCollector implements LaserDataCollector {
             laserPoint[1] += a;
         }
     }
+
+
+    public int[][] getLasers(){
+        return laserPoints;
+    }
 }

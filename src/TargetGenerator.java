@@ -1,4 +1,7 @@
-public interface TargetGenerator {
+/**
+ * Something that can produce both whole and broken targets
+ */
+public interface TargetGenerator extends Listable{
 
     /**
      * Returns a Target that should be classified as 'broken' centered at 0, 0
@@ -23,9 +26,4 @@ public interface TargetGenerator {
      * @return a 'whole' target
      */
     Target getWholeTarget(int x, int y);
-
-    // Make abstract class for whole target because it is the easiest one and can be reused; aka
-    // the methods of making broken targets are more interesting
-
-
 }

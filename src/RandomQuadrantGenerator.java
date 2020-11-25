@@ -16,10 +16,6 @@ public class RandomQuadrantGenerator extends AbstractTargetGenerator{
         super(numEdges, targetDiameter, targetSpeedMph);
     }
 
-    @Override
-    public Target getBrokenTarget() {
-        return getBrokenTarget(0, 0);
-    }
 
     @Override
     public Target getBrokenTarget(int xOrig, int yOrig) {
@@ -60,5 +56,15 @@ public class RandomQuadrantGenerator extends AbstractTargetGenerator{
         // TODO add small scattered pieces for noise (make a separate class to extend with a noise function?)
 
         return t;
+    }
+
+    /**
+     * Gets the name that the listable object should be referred to as
+     *
+     * @return the name of the object
+     */
+    @Override
+    public String getName() {
+        return "Random Quadrant";
     }
 }
