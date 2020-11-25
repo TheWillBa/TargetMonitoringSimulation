@@ -3,12 +3,19 @@ public class InterruptLaserDataCollector extends AbstractLaserDataCollector{
     /**
      * Collects the target data each millis as if being dropped through lasers
      * @param numLasers the number of lasers
-     * @param spacing the spacing of the lasers
+     * @param spacing the spacing of the lasers in mm
      */
     InterruptLaserDataCollector(int numLasers, int spacing) {
         super(numLasers, spacing);
     }
 
+    /**
+     * Collects the target data each millis as if being dropped through lasers accounting for an x, y offset
+     * @param numLasers the number of lasers
+     * @param spacing the spacing of the lasers in mm
+     * @param x
+     * @param y
+     */
     InterruptLaserDataCollector(int numLasers, int spacing, int x, int y) {
         super(numLasers, spacing, x, y);
     }
@@ -32,7 +39,7 @@ public class InterruptLaserDataCollector extends AbstractLaserDataCollector{
      */
     private void setLaserPos(int y){
         for(int[] laserPoint : laserPoints){
-            laserPoint[1] = y;
+            laserPoint[1] = y; // TODO account for offset
         }
     }
 
