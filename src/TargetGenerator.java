@@ -27,4 +27,5 @@ public interface TargetGenerator {
     // Make abstract class for whole target because it is the easiest one and can be reused; aka
     // the methods of making broken targets are more interesting
 
+
 }
