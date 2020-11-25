@@ -20,7 +20,7 @@ public class BasicLaserDataAnalyzer implements LaserDataAnalyzer{
         int GOAL_HITS_1 = maxRequiredNumHitLasers(targetDiameter, laserSpacing);
         GOAL_HITS_1 = Math.min(GOAL_HITS_1, data[0].length);
         final int GOAL_HITS_2 = GOAL_HITS_1 - 1;
-        System.out.println(GOAL_HITS_1 + " " + GOAL_HITS_2);
+        //System.out.println(GOAL_HITS_1 + " " + GOAL_HITS_2);
 
         int[] lasersHitState = new int[data[0].length];
 

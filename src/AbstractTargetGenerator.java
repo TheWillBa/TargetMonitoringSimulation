@@ -24,16 +24,14 @@ public abstract class AbstractTargetGenerator implements TargetGenerator{
     }
 
     @Override
-    public Target getWholeTarget(int xOrig, int yOrig){
+    public Target getWholeTarget(int xOrig, int yOrig){ // TODO move shift to constructor?
         Target t = new Target(targetSpeedMph, targetRadius*2);
         Piece p = new Piece();
         for(int i = 0; i < numEdges; i++){
             int x = (int) (Math.cos(i * 2 * Math.PI / numEdges) * targetRadius);
             int y = (int) (Math.sin(i * 2 * Math.PI / numEdges) * targetRadius);
-            //System.out.print(x + 200 + " " );
-            //System.out.print(y + 200 + "\n");
+
             p.addPoint(x + xOrig, y + yOrig);
-            //System.out.println(Arrays.toString(p.getPoint(i)));
         }
         t.addPiece(p);
         return t;
