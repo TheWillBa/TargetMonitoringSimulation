@@ -8,6 +8,9 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -274,6 +277,7 @@ public class SimulationApplicationGUI extends Application {
                     @Override
                     public void handle(ActionEvent event) {
 
+                        // TODO pull this out into pure classes and logic somehow?
                         List<TestStatistics> tests = new ArrayList<>();
                         int origVal = var._value;
                         for(int i = min._value; i <= max._value; i++){
@@ -283,6 +287,8 @@ public class SimulationApplicationGUI extends Application {
                             tests.add(stats);
                         }
                         var._value = origVal;
+
+                        displayDataGraph(min._value, max._value, tests, text, newWindow);
                     }
                 });
 
@@ -290,6 +296,52 @@ public class SimulationApplicationGUI extends Application {
             }
         });
         return b;
+    }
+
+    private void displayDataGraph(int depMin, int depMax, List<TestStatistics> tests, String text, Stage parentStage){
+        HBox secondaryLayout = new HBox();
+        Scene secondScene = new Scene(secondaryLayout, 500, 500);
+
+        // New window (Stage)
+        Stage newWindow = new Stage();
+        newWindow.setTitle("Data Graph");
+        newWindow.setScene(secondScene);
+
+        // Specifies the modality for new window.
+        newWindow.initModality(Modality.APPLICATION_MODAL);
+
+        // Specifies the owner Window (parent) for new window
+        newWindow.initOwner(parentStage);
+
+        // Chart Business
+        final NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel(text);
+        final NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Test Statistics");
+        final LineChart<Number, Number> chart = new LineChart<Number, Number>(xAxis, yAxis);
+
+        XYChart.Series<Number, Number> accuracySeries = new XYChart.Series<>();
+        accuracySeries.setName("Accuracy");
+        XYChart.Series<Number, Number> recallSeries = new XYChart.Series<>();
+        recallSeries.setName("Recall");
+        XYChart.Series<Number, Number> specificitySeries = new XYChart.Series<>();
+        specificitySeries.setName("Specificity");
+
+        for(int i = depMin; i <= depMax; i++){
+            TestStatistics stats = tests.get(i - depMin);
+            accuracySeries.getData().add(new XYChart.Data<>(i, stats.accuracy()));
+            recallSeries.getData().add(new XYChart.Data<>(i, stats.recall()));
+            specificitySeries.getData().add(new XYChart.Data<>(i, stats.specificity()));
+        } // TODO keep track of min/max for scale?
+
+        chart.getData().addAll(accuracySeries, recallSeries, specificitySeries);
+        secondaryLayout.getChildren().addAll(chart);
+                // Set position of second window, related to primary window.
+        newWindow.setX(parentStage.getX());
+        newWindow.setY(parentStage.getY());
+
+
+        newWindow.show();
     }
 
     private VBox createVariableSetterPanel(String text, Int var){
