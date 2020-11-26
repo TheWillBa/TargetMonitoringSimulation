@@ -8,10 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -137,9 +134,15 @@ public class SimulationApplicationGUI extends Application {
             statsPanel.setSpacing(5);
 
             final Label accuracyLabel = new Label("Accuracy: ???");
+                final Tooltip aTT = new Tooltip("Fraction of total correct classifications");
+                accuracyLabel.setTooltip(aTT);
             final Label precisionLabel = new Label("Precision: ???");
             final Label recallLabel = new Label("Recall: ???");
+                final Tooltip rTT = new Tooltip("Fraction of whole targets correctly classified");
+                recallLabel.setTooltip(rTT);
             final Label specificityLabel = new Label("Specificity: ???");
+                final Tooltip sTT = new Tooltip("Fraction of broken targets correctly classified");
+                specificityLabel.setTooltip(sTT);
             final Label fBetaLabel = new Label("F-beta Score: ???");
 
             statsPanel.getChildren().addAll(accuracyLabel, precisionLabel, recallLabel, specificityLabel, fBetaLabel);
@@ -210,7 +213,7 @@ public class SimulationApplicationGUI extends Application {
         aW.setText("Total Whole: " + stats.numWholeSamples());
         aB.setText("Total Broken: " + stats.numBrokenSamples());
         a.setText("Accuracy: " + stats.accuracy());
-        p.setText("Precision: " + stats.precision());
+        p.setText("Precision: " + Math.floor(stats.precision() * 1000) / 1000.0);
         r.setText("Recall: " + stats.recall());
         s.setText("Specificity: " + stats.specificity());
         //fbs.setText("F-beta Score: " + stats.fBetaScore(/* beta */));
