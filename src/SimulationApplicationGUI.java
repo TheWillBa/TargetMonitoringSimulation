@@ -1,5 +1,8 @@
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -26,14 +29,7 @@ import java.util.stream.Collectors;
 public class SimulationApplicationGUI extends Application {
 
     // TODO add ability to test over a range of a single dependant var and export to excel and display graph in new window
-    private final Int _diameter = new Int(108); //mm
-    private final Int _speed = new Int(2); //mph
-    private final Int _numLasers = new Int(9);
-    private final Int _spacing = new Int(35);
-    private final Int _numEdges = new Int(32);
-
-    private final Int _whole = new Int(100);
-    private final Int _broken = new Int(100);
+    TesterMaster _master = new TesterMaster();
 
 
     // These are class vars because they're so much easier to deal with
@@ -56,25 +52,17 @@ public class SimulationApplicationGUI extends Application {
                 //specificityLabel.setTooltip(sTT);
     final Label _fBetaLabel = new Label("F-beta Score: ???");
 
-
     //#region Get list views
-    final ListView<String> generatorsList = new ListView<>(getSortedObservableList(masterGeneratorList()));
-    final ListView<String> collectorsList = new ListView<>(getSortedObservableList(masterDataCollectorList()));
-    final ListView<String> analyzersList = new ListView<>(getSortedObservableList(masterDataAnalyzerList()));
+    final ListView<String> generatorsList = new ListView<>(getSortedObservableList(_master.masterGeneratorList()));
+    final ListView<String> collectorsList = new ListView<>(getSortedObservableList(_master.masterDataCollectorList()));
+    final ListView<String> analyzersList = new ListView<>(getSortedObservableList(_master.masterDataAnalyzerList()));
     //#endregion
 
 
-    private static class Int{
-        int _value;
-        public Int(int v){
-            _value = v;
-        }
-    }
 
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Breakage Monitoring Simulation");
-
 
 
         final HBox rootPanel = new HBox();
@@ -93,7 +81,7 @@ public class SimulationApplicationGUI extends Application {
 
         Button imageButton = new Button("Visualize Configuration"){
             public void fire () {
-                drawVisuals(gc, canvasWidth, canvasHeight, generatorsList, collectorsList);
+                drawVisuals(gc, canvasWidth, canvasHeight);
                     /* Add display items that this has to modify here */
             }
         };
@@ -111,13 +99,13 @@ public class SimulationApplicationGUI extends Application {
         HBox settingsRow3 = new HBox();
         settingsRow3.setPadding(new Insets(0, 0, 0, 12));
 
-        VBox diameterPanel = createVariableSetterPanel("Diameter (mm)", _diameter);
-        VBox speedPanel = createVariableSetterPanel("Speed (MPH)", _speed);
-        VBox numLasersPanel = createVariableSetterPanel("Num Lasers", _numLasers);
-        VBox spacingPanel = createVariableSetterPanel("Laser Spacing (mm)", _spacing);
-        VBox numEdgesPanel = createVariableSetterPanel("Num Edges", _numEdges);
-        VBox wholePanel = createVariableSetterPanel("Whole Targets", _whole);
-        VBox brokenPanel = createVariableSetterPanel("Broken Targets", _broken);
+        VBox diameterPanel = createVariableSetterPanel("Diameter (mm)", _master.getDiameterObj());
+        VBox speedPanel = createVariableSetterPanel("Speed (MPH)", _master.getSpeedObj());
+        VBox numLasersPanel = createVariableSetterPanel("Num Lasers", _master.getNumLasersObj());
+        VBox spacingPanel = createVariableSetterPanel("Laser Spacing (mm)", _master.getSpacingObj());
+        VBox numEdgesPanel = createVariableSetterPanel("Num Edges", _master.getNumEdgesObj());
+        VBox wholePanel = createVariableSetterPanel("Whole Targets", _master.getWholeObj());
+        VBox brokenPanel = createVariableSetterPanel("Broken Targets", _master.getBrokenObj());
 
         settingsRow1.getChildren().addAll(diameterPanel, speedPanel, numEdgesPanel);
         settingsRow2.getChildren().addAll(numLasersPanel, spacingPanel);
@@ -126,16 +114,45 @@ public class SimulationApplicationGUI extends Application {
         //#endregion
 
             //#region ListView selectors setup
+        final Label currentGeneratorLabel = new Label("Current = " + _master.getTargetGenerator().getName());
+        final Label currentCollectorLabel = new Label("Current = " + _master.getLaserDataCollector().getName());
+        final Label currentAnalyzerLabel = new Label("Current = " + _master.getLaserDataAnalyzer().getName());
+
+        generatorsList.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                _master.get_generatorIndex()._value = newValue.intValue();
+                currentGeneratorLabel.setText("Current = " + _master.getTargetGenerator().getName());
+            }
+        });
+
+        collectorsList.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                _master.get_collectorIndex()._value = newValue.intValue();
+                currentCollectorLabel.setText("Current = " + _master.getLaserDataCollector().getName());
+            }
+        });
+
+        analyzersList.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                _master.get_analyzerIndex()._value = newValue.intValue();
+                currentAnalyzerLabel.setText("Current = " + _master.getLaserDataAnalyzer().getName());
+            }
+        });
+
+
             final HBox selectionPanel = new HBox();
             selectionPanel.setPadding(new Insets(15, 12, 15, 12));
             selectionPanel.setSpacing(10);
 
                 VBox generatorPanel = new VBox();
-                generatorPanel.getChildren().addAll(new Label("Target Generator"), generatorsList); // TODO add generators
+                generatorPanel.getChildren().addAll(new Label("Target Generator"), currentGeneratorLabel ,generatorsList); // TODO add generators
                 VBox collectorPanel = new VBox();
-                collectorPanel.getChildren().addAll(new Label("Data Collector"), collectorsList); // TODO add generators
+                collectorPanel.getChildren().addAll(new Label("Data Collector"), currentCollectorLabel, collectorsList); // TODO add generators
                 VBox analyzerPanel = new VBox();
-                analyzerPanel.getChildren().addAll(new Label("Data Analyzer"), analyzersList); // TODO add generators
+                analyzerPanel.getChildren().addAll(new Label("Data Analyzer"), currentAnalyzerLabel, analyzersList); // TODO add generators
 
             selectionPanel.getChildren().addAll(generatorPanel, collectorPanel, analyzerPanel);
             //#endregion
@@ -167,12 +184,27 @@ public class SimulationApplicationGUI extends Application {
 
         final Button searchButton = new Button("Run Simulation") {
             public void fire () {
+                TestStatistics stats;
                 try {
-                    runSimulation(generatorsList, collectorsList, analyzersList);
-                }
-                catch (IllegalArgumentException e){
+                    stats = _master.runSimulation();
+
+                    //#region Gross display nonsense
+                    _trueWholeLabel.setText("True Whole: " + stats.trueWhole());
+                    _falseWholeLabel.setText("False Whole: " + stats.falseWhole());
+                    _trueBrokenLabel.setText("True Broken: " + stats.trueBroken());
+                    _falseBrokenLabel.setText("False Broken: " + stats.falseBroken());
+                    _totalWholeLabel.setText("Total Whole: " + stats.numWholeSamples());
+                    _totalBrokenLabel.setText("Total Broken: " + stats.numBrokenSamples());
+                    _accuracyLabel.setText("Accuracy: " + stats.accuracy());
+                    _precisionLabel.setText("Precision: " + Math.floor(stats.precision() * 1000) / 1000.0);
+                    _recallLabel.setText("Recall: " + stats.recall());
+                    _specificityLabel.setText("Specificity: " + stats.specificity());
+                    //fbs.setText("F-beta Score: " + stats.fBetaScore(/* beta */));
+                    //#endregion
+                } catch (IllegalArgumentException e) {
                     // Do nothing
                 }
+
 
             }
         };
@@ -182,8 +214,9 @@ public class SimulationApplicationGUI extends Application {
         optionsPanel.getChildren().addAll(settingsRow1, settingsRow2, settingsRow3, selectionPanel, allResultsPanel);
         imagePanel.getChildren().addAll(buttonPanel, canvas);
         rootPanel.getChildren().addAll(optionsPanel, imagePanel);
-            // TODO allow export results to a file
+            // TODO allow export results to a file (make data exporter a separate class)
 
+        //#region Testing Over a Single Variable
         Button button = new Button();
         button.setText("Test Over Single Variable");
 
@@ -199,7 +232,7 @@ public class SimulationApplicationGUI extends Application {
                 VBox secondaryLayout = new VBox();
 
 
-                Scene secondScene = new Scene(secondaryLayout, 500, 100);
+                Scene secondScene = new Scene(secondaryLayout, 400, 150);
 
                 // New window (Stage)
                 Stage newWindow = new Stage();
@@ -217,88 +250,77 @@ public class SimulationApplicationGUI extends Application {
                 newWindow.setY(primaryStage.getY() + 100);
 
 
+                final Int[] selectedVar = new Int[1];
+                final String[] selectedVarText = new String[1];
 
-                Int oldVal = new Int(0);
+                Button diameterButton = new Button("Diameter"){
+                    @Override
+                    public void fire() {
+                        selectedVar[0] = _master.getDiameterObj();
+                        selectedVarText[0] = "Diameter";
+                    }
+                };
+                Button speedButton  = new Button("Speed"){
+                    @Override
+                    public void fire() {
+                        selectedVar[0] = _master.getSpeedObj();
+                        selectedVarText[0] = "Speed";
+                    }
+                };
 
-                Button diameterButton = createVariableTesterSelectorButton("Diameter", _diameter, newWindow, oldVal);
-                Button speedButton = createVariableTesterSelectorButton("Speed",_speed,newWindow, oldVal);
-                Button numLasersButton = createVariableTesterSelectorButton("Number of Lasers",_numLasers, newWindow,oldVal);
-                Button spacingButton = createVariableTesterSelectorButton("Laser Spacing",_spacing, newWindow,oldVal);
-                Button numEdgesButton = createVariableTesterSelectorButton("Number of Edges", _numEdges, newWindow,oldVal);
+                Button numEdgesButton = new Button("NumEdges"){
+                    @Override
+                    public void fire() {
+                        selectedVar[0] = _master.getDiameterObj();
+                        selectedVarText[0] = "NumEdges";
+                    }
+                };
+
+                Int min = new Int(0);
+                Int max = new Int(10);
 
                 HBox selectorButtons = new HBox();
-                selectorButtons.getChildren().addAll(diameterButton, speedButton, numLasersButton, spacingButton, numEdgesButton);
-                secondaryLayout.getChildren().addAll(selectorButtons);
+                HBox minMaxButtons = new HBox();
+                selectorButtons.getChildren().addAll(diameterButton, speedButton, numEdgesButton);
+                selectorButtons.setPadding(new Insets(15,0,0,0));
+                minMaxButtons.getChildren().addAll(createVariableSetterPanel("Min", min), createVariableSetterPanel("Max", max));
+                secondaryLayout.getChildren().addAll(selectorButtons, minMaxButtons);
                 selectorButtons.setAlignment(Pos.CENTER);
+                minMaxButtons.setAlignment(Pos.CENTER);
+
+                HBox runPanel = new HBox();
+
+                Button runOverVarTestButton = new Button("Run Simulations"){
+                    @Override
+                    public void fire() {
+                        try{
+                            List<TestStatistics> tests = _master.runSimulationOverVariable(min._value, max._value, 1, selectedVar[0]);
+                            displayDataGraph(min._value, max._value, tests, selectedVarText[0], newWindow);
+                        }catch(NullPointerException e){
+                            // DO nothing // TODO display reuseable pop up input error
+                        }
+
+                    }
+                };
+                runPanel.getChildren().addAll(runOverVarTestButton);
+                runPanel.setAlignment(Pos.CENTER);
+
+                secondaryLayout.getChildren().addAll(runPanel);
+
+
+
                 newWindow.show();
             }
         });
+
+        //#endregion
 
         primaryStage.setScene(new Scene(rootPanel, 1000, 500));
         primaryStage.show();
     }
 
-    private Button createVariableTesterSelectorButton(String text, Int var, Stage primaryStage, Int oldValStore){
-        Button b = new Button(text);
 
-        b.setOnAction(new EventHandler<ActionEvent>() {
-
-            @Override
-            public void handle(ActionEvent event) {
-
-                HBox secondaryLayout = new HBox();
-                Scene secondScene = new Scene(secondaryLayout, 500, 100);
-
-                // New window (Stage)
-                Stage newWindow = new Stage();
-                newWindow.setTitle("Select Range");
-                newWindow.setScene(secondScene);
-
-                // Specifies the modality for new window.
-                newWindow.initModality(Modality.APPLICATION_MODAL);
-
-                // Specifies the owner Window (parent) for new window
-                newWindow.initOwner(primaryStage);
-
-                // Set position of second window, related to primary window.
-                newWindow.setX(primaryStage.getX());
-                newWindow.setY(primaryStage.getY());
-
-                Int min = new Int(0);
-                Int max = new Int(10);
-                VBox minPanel = createVariableSetterPanel("Min", min);
-                VBox maxPanel = createVariableSetterPanel("Max", max);
-                secondaryLayout.getChildren().addAll(minPanel, maxPanel);
-
-                Button testButton = new Button("Run Tests");
-                secondaryLayout.getChildren().addAll(testButton);
-
-                testButton.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-
-                        // TODO pull this out into pure classes and logic somehow?
-                        List<TestStatistics> tests = new ArrayList<>();
-                        int origVal = var._value;
-                        for(int i = min._value; i <= max._value; i++){
-                            var._value = i;
-                            TestStatistics stats = runSimulation(generatorsList, collectorsList, analyzersList);
-                            System.out.println(stats);
-                            tests.add(stats);
-                        }
-                        var._value = origVal;
-
-                        displayDataGraph(min._value, max._value, tests, text, newWindow);
-                    }
-                });
-
-                newWindow.show();
-            }
-        });
-        return b;
-    }
-
-    private void displayDataGraph(int depMin, int depMax, List<TestStatistics> tests, String text, Stage parentStage){
+    private static void displayDataGraph(int depMin, int depMax, List<TestStatistics> tests, String text, Stage parentStage){
         HBox secondaryLayout = new HBox();
         Scene secondScene = new Scene(secondaryLayout, 500, 500);
 
@@ -344,7 +366,7 @@ public class SimulationApplicationGUI extends Application {
         newWindow.show();
     }
 
-    private VBox createVariableSetterPanel(String text, Int var){
+    private static VBox createVariableSetterPanel(String text, Int var){
         VBox panel = new VBox();
         panel.setPadding(new Insets(5, 4, 5, 0));
         Label label = new Label(text + " = " + var._value);
@@ -361,41 +383,9 @@ public class SimulationApplicationGUI extends Application {
             System.out.println(var._value);
         };
         tf.setOnAction(event);
-
         return panel;
     }
 
-    private TestStatistics runSimulation(ListView<String> generators, ListView<String> collectors, ListView<String> analyzers){
-        // TODO Check that all info is valid
-        if(generators.getSelectionModel().isEmpty() ||
-                collectors.getSelectionModel().isEmpty() ||
-                analyzers.getSelectionModel().isEmpty()){
-            throw new IllegalArgumentException();
-        }
-
-        TargetGenerator generator = masterGeneratorList().get(generators.getSelectionModel().getSelectedIndex());
-        LaserDataCollector collector = masterDataCollectorList().get(collectors.getSelectionModel().getSelectedIndex());
-        LaserDataAnalyzer analyzer = masterDataAnalyzerList().get(analyzers.getSelectionModel().getSelectedIndex());
-        BreakageClassifier classifier = new LaserBreakageClassifier(collector, analyzer);
-        BreakageClassifierTester tester = new BreakageClassifierTester(classifier, generator);
-
-        TestStatistics stats = tester.test(_whole._value, _broken._value);
-        //#region Gross display nonsense
-        _trueWholeLabel.setText("True Whole: " + stats.trueWhole());
-        _falseWholeLabel.setText("False Whole: " + stats.falseWhole());
-        _trueBrokenLabel.setText("True Broken: " + stats.trueBroken());
-        _falseBrokenLabel.setText("False Broken: " + stats.falseBroken());
-        _totalWholeLabel.setText("Total Whole: " + stats.numWholeSamples());
-        _totalBrokenLabel.setText("Total Broken: " + stats.numBrokenSamples());
-        _accuracyLabel.setText("Accuracy: " + stats.accuracy());
-        _precisionLabel.setText("Precision: " + Math.floor(stats.precision() * 1000) / 1000.0);
-        _recallLabel.setText("Recall: " + stats.recall());
-        _specificityLabel.setText("Specificity: " + stats.specificity());
-        //fbs.setText("F-beta Score: " + stats.fBetaScore(/* beta */));
-        //#endregion
-
-        return stats;
-    }
 
     /**
      * Converts from a List of Listables to a List of String objects.
@@ -413,46 +403,7 @@ public class SimulationApplicationGUI extends Application {
         return FXCollections.observableList(getNames(items));
     }
 
-    private List<TargetGenerator> masterGeneratorList(){
-        List<TargetGenerator> generators = new ArrayList<TargetGenerator>();
-
-        TargetGenerator generator0 = new RandomQuadrantGenerator(_numEdges._value, _diameter._value, _speed._value);
-        generators.add(generator0);
-
-        TargetGenerator generator1 = new ManySmallPiecesGenerator(_numEdges._value, _diameter._value, _speed._value);
-        generators.add(generator1);
-
-        // Add more options here
-
-        return generators;
-    }
-
-    private List<LaserDataCollector> masterDataCollectorList(){
-        List<LaserDataCollector> collectors = new ArrayList<>();
-
-        LaserDataCollector collector0 = new InterruptLaserDataCollector(_numLasers._value, _spacing._value);
-        collectors.add(collector0);
-
-        LaserDataCollector collector1 = new PollingLaserDataCollector(_numLasers._value, _spacing._value);
-        collectors.add(collector1);
-
-        // Add more options here
-
-        return collectors;
-    }
-
-    private List<LaserDataAnalyzer> masterDataAnalyzerList(){
-        List<LaserDataAnalyzer> analyzers = new ArrayList<>();
-
-        LaserDataAnalyzer analyzer0 = new BasicLaserDataAnalyzer(_diameter._value, _spacing._value);
-        analyzers.add(analyzer0);
-
-        // Add more options here
-
-        return analyzers;
-    }
-
-    private void drawVisuals(GraphicsContext g, double width, double height, ListView<String> generators, ListView<String> collectors){
+    private void drawVisuals(GraphicsContext g, double width, double height){
 
         g.setFill(Color.LIGHTYELLOW);
         g.fillRect(0,0,width,height);
@@ -461,13 +412,10 @@ public class SimulationApplicationGUI extends Application {
         g.strokeRect(0,0,width,height);
 
 
-        if(generators.getSelectionModel().isEmpty() ||
-                collectors.getSelectionModel().isEmpty()){
-            return;
-        }
+        // TODO check here?
 
-        TargetGenerator generator = masterGeneratorList().get(generators.getSelectionModel().getSelectedIndex());
-        LaserDataCollector collector = masterDataCollectorList().get(collectors.getSelectionModel().getSelectedIndex());
+        TargetGenerator generator = _master.getTargetGenerator();
+        LaserDataCollector collector = _master.getLaserDataCollector();
 
         Target target = generator.getBrokenTarget((int) (width/2), (int) (height/2));
         int[][] lasers = collector.getLasers();
@@ -475,7 +423,7 @@ public class SimulationApplicationGUI extends Application {
         paintLasers(lasers, width, height, g);
     }
 
-    private void paintTarget(Target t, GraphicsContext g){
+    private static void paintTarget(Target t, GraphicsContext g){
         g.setFill(Color.ORANGE);
 
         for(Piece p : t.getPieces()){
@@ -491,7 +439,7 @@ public class SimulationApplicationGUI extends Application {
         }
     }
 
-    private void paintLasers(int[][] lasers, double width, double height, GraphicsContext g){
+    private static void paintLasers(int[][] lasers, double width, double height, GraphicsContext g){
         g.setFill(Color.RED);
         double xOff = (width/2);
         double yOff = height/2 + height/5;
