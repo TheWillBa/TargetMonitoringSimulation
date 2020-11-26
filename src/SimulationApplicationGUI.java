@@ -9,12 +9,12 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class SimulationApplicationGUI extends Application {
 
-    // TODO let user control these
+    // TODO add ability to test over a range of a single dependant var and export to excel and display graph in new window
     private final Int _diameter = new Int(108); //mm
     private final Int _speed = new Int(2); //mph
     private final Int _numLasers = new Int(9);
@@ -32,6 +32,35 @@ public class SimulationApplicationGUI extends Application {
     private final Int _whole = new Int(100);
     private final Int _broken = new Int(100);
 
+
+    // These are class vars because they're so much easier to deal with
+    final Label _trueWholeLabel = new Label("True Whole: ???");
+    final Label _trueBrokenLabel = new Label("True Broken: ???");
+    final Label _falseWholeLabel = new Label("False Whole: ???");
+    final Label _falseBrokenLabel = new Label("False Broken: ???");
+    final Label _totalWholeLabel = new Label("Total Whole: ???");
+    final Label _totalBrokenLabel = new Label("Total Whole: ???");
+
+    final Label _accuracyLabel = new Label("Accuracy: ???");
+    final Tooltip aTT = new Tooltip("Fraction of total correct classifications");
+                //accuracyLabel.setTooltip(aTT);
+    final Label _precisionLabel = new Label("Precision: ???");
+    final Label _recallLabel = new Label("Recall: ???");
+    final Tooltip rTT = new Tooltip("Fraction of whole targets correctly classified");
+                //recallLabel.setTooltip(rTT);
+    final Label _specificityLabel = new Label("Specificity: ???");
+    final Tooltip sTT = new Tooltip("Fraction of broken targets correctly classified");
+                //specificityLabel.setTooltip(sTT);
+    final Label _fBetaLabel = new Label("F-beta Score: ???");
+
+
+    //#region Get list views
+    final ListView<String> generatorsList = new ListView<>(getSortedObservableList(masterGeneratorList()));
+    final ListView<String> collectorsList = new ListView<>(getSortedObservableList(masterDataCollectorList()));
+    final ListView<String> analyzersList = new ListView<>(getSortedObservableList(masterDataAnalyzerList()));
+    //#endregion
+
+
     private static class Int{
         int _value;
         public Int(int v){
@@ -40,12 +69,10 @@ public class SimulationApplicationGUI extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         primaryStage.setTitle("Breakage Monitoring Simulation");
 
-        final ListView<String> generatorsList = new ListView<>(getSortedObservableList(masterGeneratorList()));
-        final ListView<String> collectorsList = new ListView<>(getSortedObservableList(masterDataCollectorList()));
-        final ListView<String> analyzersList = new ListView<>(getSortedObservableList(masterDataAnalyzerList()));
+
 
         final HBox rootPanel = new HBox();
 
@@ -81,10 +108,10 @@ public class SimulationApplicationGUI extends Application {
         HBox settingsRow3 = new HBox();
         settingsRow3.setPadding(new Insets(0, 0, 0, 12));
 
-        VBox diameterPanel = createVariableSetterPanel("Diameter", _diameter);
+        VBox diameterPanel = createVariableSetterPanel("Diameter (mm)", _diameter);
         VBox speedPanel = createVariableSetterPanel("Speed (MPH)", _speed);
         VBox numLasersPanel = createVariableSetterPanel("Num Lasers", _numLasers);
-        VBox spacingPanel = createVariableSetterPanel("Laser Spacing", _spacing);
+        VBox spacingPanel = createVariableSetterPanel("Laser Spacing (mm)", _spacing);
         VBox numEdgesPanel = createVariableSetterPanel("Num Edges", _numEdges);
         VBox wholePanel = createVariableSetterPanel("Whole Targets", _whole);
         VBox brokenPanel = createVariableSetterPanel("Broken Targets", _broken);
@@ -120,42 +147,30 @@ public class SimulationApplicationGUI extends Application {
             resultPanel.setPadding(new Insets(0, 0,15,12));
             resultPanel.setSpacing(5);
 
-            final Label trueWholeLabel = new Label("True Whole: ???");
-            final Label trueBrokenLabel = new Label("True Broken: ???");
-            final Label falseWholeLabel = new Label("False Whole: ???");
-            final Label falseBrokenLabel = new Label("False Broken: ???");
-            final Label totalWholeLabel = new Label("Total Whole: ???");
-            final Label totalBrokenLabel = new Label("Total Whole: ???");
 
-            resultPanel.getChildren().addAll(trueWholeLabel, trueBrokenLabel, falseWholeLabel, falseBrokenLabel, totalWholeLabel, totalBrokenLabel);
+            resultPanel.getChildren().addAll(_trueWholeLabel, _trueBrokenLabel, _falseWholeLabel, _falseBrokenLabel, _totalWholeLabel, _totalBrokenLabel);
 
             final VBox statsPanel = new VBox();
             statsPanel.setPadding(new Insets(0, 0,15,12));
             statsPanel.setSpacing(5);
 
-            final Label accuracyLabel = new Label("Accuracy: ???");
-                final Tooltip aTT = new Tooltip("Fraction of total correct classifications");
-                accuracyLabel.setTooltip(aTT);
-            final Label precisionLabel = new Label("Precision: ???");
-            final Label recallLabel = new Label("Recall: ???");
-                final Tooltip rTT = new Tooltip("Fraction of whole targets correctly classified");
-                recallLabel.setTooltip(rTT);
-            final Label specificityLabel = new Label("Specificity: ???");
-                final Tooltip sTT = new Tooltip("Fraction of broken targets correctly classified");
-                specificityLabel.setTooltip(sTT);
-            final Label fBetaLabel = new Label("F-beta Score: ???");
 
-            statsPanel.getChildren().addAll(accuracyLabel, precisionLabel, recallLabel, specificityLabel, fBetaLabel);
+
+            statsPanel.getChildren().addAll(_accuracyLabel, _precisionLabel, _recallLabel, _specificityLabel, _fBetaLabel);
 
             final HBox allResultsPanel = new HBox();
             allResultsPanel.getChildren().addAll(resultPanel, statsPanel);
 
 
-        final Button searchButton = new Button("Run simulation") {
+        final Button searchButton = new Button("Run Simulation") {
             public void fire () {
-                runSimulation(generatorsList, collectorsList, analyzersList, trueWholeLabel, falseWholeLabel,
-                        trueBrokenLabel, falseBrokenLabel, totalWholeLabel, totalBrokenLabel, accuracyLabel, precisionLabel,
-                        recallLabel, specificityLabel, fBetaLabel);
+                try {
+                    runSimulation(generatorsList, collectorsList, analyzersList);
+                }
+                catch (IllegalArgumentException e){
+                    // Do nothing
+                }
+
             }
         };
             //#endregion
@@ -165,8 +180,116 @@ public class SimulationApplicationGUI extends Application {
         imagePanel.getChildren().addAll(buttonPanel, canvas);
         rootPanel.getChildren().addAll(optionsPanel, imagePanel);
             // TODO allow export results to a file
+
+        Button button = new Button();
+        button.setText("Test Over Single Variable");
+
+        buttonPanel.getChildren().addAll(button);
+
+        button.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+
+                Label secondLabel = new Label("Coming soon");
+
+                VBox secondaryLayout = new VBox();
+
+
+                Scene secondScene = new Scene(secondaryLayout, 500, 100);
+
+                // New window (Stage)
+                Stage newWindow = new Stage();
+                newWindow.setTitle("Test Single Variable");
+                newWindow.setScene(secondScene);
+
+                // Specifies the modality for new window.
+                newWindow.initModality(Modality.APPLICATION_MODAL);
+
+                // Specifies the owner Window (parent) for new window
+                newWindow.initOwner(primaryStage);
+
+                // Set position of second window, related to primary window.
+                newWindow.setX(primaryStage.getX() + 200);
+                newWindow.setY(primaryStage.getY() + 100);
+
+
+
+                Int oldVal = new Int(0);
+
+                Button diameterButton = createVariableTesterSelectorButton("Diameter", _diameter, newWindow, oldVal);
+                Button speedButton = createVariableTesterSelectorButton("Speed",_speed,newWindow, oldVal);
+                Button numLasersButton = createVariableTesterSelectorButton("Number of Lasers",_numLasers, newWindow,oldVal);
+                Button spacingButton = createVariableTesterSelectorButton("Laser Spacing",_spacing, newWindow,oldVal);
+                Button numEdgesButton = createVariableTesterSelectorButton("Number of Edges", _numEdges, newWindow,oldVal);
+
+                HBox selectorButtons = new HBox();
+                selectorButtons.getChildren().addAll(diameterButton, speedButton, numLasersButton, spacingButton, numEdgesButton);
+                secondaryLayout.getChildren().addAll(selectorButtons);
+                selectorButtons.setAlignment(Pos.CENTER);
+                newWindow.show();
+            }
+        });
+
         primaryStage.setScene(new Scene(rootPanel, 1000, 500));
         primaryStage.show();
+    }
+
+    private Button createVariableTesterSelectorButton(String text, Int var, Stage primaryStage, Int oldValStore){
+        Button b = new Button(text);
+
+        b.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+
+                HBox secondaryLayout = new HBox();
+                Scene secondScene = new Scene(secondaryLayout, 500, 100);
+
+                // New window (Stage)
+                Stage newWindow = new Stage();
+                newWindow.setTitle("Select Range");
+                newWindow.setScene(secondScene);
+
+                // Specifies the modality for new window.
+                newWindow.initModality(Modality.APPLICATION_MODAL);
+
+                // Specifies the owner Window (parent) for new window
+                newWindow.initOwner(primaryStage);
+
+                // Set position of second window, related to primary window.
+                newWindow.setX(primaryStage.getX());
+                newWindow.setY(primaryStage.getY());
+
+                Int min = new Int(0);
+                Int max = new Int(10);
+                VBox minPanel = createVariableSetterPanel("Min", min);
+                VBox maxPanel = createVariableSetterPanel("Max", max);
+                secondaryLayout.getChildren().addAll(minPanel, maxPanel);
+
+                Button testButton = new Button("Run Tests");
+                secondaryLayout.getChildren().addAll(testButton);
+
+                testButton.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+
+                        List<TestStatistics> tests = new ArrayList<>();
+                        int origVal = var._value;
+                        for(int i = min._value; i <= max._value; i++){
+                            var._value = i;
+                            TestStatistics stats = runSimulation(generatorsList, collectorsList, analyzersList);
+                            System.out.println(stats);
+                            tests.add(stats);
+                        }
+                        var._value = origVal;
+                    }
+                });
+
+                newWindow.show();
+            }
+        });
+        return b;
     }
 
     private VBox createVariableSetterPanel(String text, Int var){
@@ -190,13 +313,12 @@ public class SimulationApplicationGUI extends Application {
         return panel;
     }
 
-    private void runSimulation(ListView<String> generators, ListView<String> collectors, ListView<String> analyzers,
-                               Label tW, Label fW, Label tB, Label fB, Label aW, Label aB, Label a, Label p, Label r, Label s, Label fbs){
+    private TestStatistics runSimulation(ListView<String> generators, ListView<String> collectors, ListView<String> analyzers){
         // TODO Check that all info is valid
         if(generators.getSelectionModel().isEmpty() ||
                 collectors.getSelectionModel().isEmpty() ||
                 analyzers.getSelectionModel().isEmpty()){
-            return;
+            throw new IllegalArgumentException();
         }
 
         TargetGenerator generator = masterGeneratorList().get(generators.getSelectionModel().getSelectedIndex());
@@ -206,17 +328,21 @@ public class SimulationApplicationGUI extends Application {
         BreakageClassifierTester tester = new BreakageClassifierTester(classifier, generator);
 
         TestStatistics stats = tester.test(_whole._value, _broken._value);
-        tW.setText("True Whole: " + stats.trueWhole());
-        fW.setText("False Whole: " + stats.falseWhole());
-        tB.setText("True Broken: " + stats.trueBroken());
-        fB.setText("False Broken: " + stats.falseBroken());
-        aW.setText("Total Whole: " + stats.numWholeSamples());
-        aB.setText("Total Broken: " + stats.numBrokenSamples());
-        a.setText("Accuracy: " + stats.accuracy());
-        p.setText("Precision: " + Math.floor(stats.precision() * 1000) / 1000.0);
-        r.setText("Recall: " + stats.recall());
-        s.setText("Specificity: " + stats.specificity());
+        //#region Gross display nonsense
+        _trueWholeLabel.setText("True Whole: " + stats.trueWhole());
+        _falseWholeLabel.setText("False Whole: " + stats.falseWhole());
+        _trueBrokenLabel.setText("True Broken: " + stats.trueBroken());
+        _falseBrokenLabel.setText("False Broken: " + stats.falseBroken());
+        _totalWholeLabel.setText("Total Whole: " + stats.numWholeSamples());
+        _totalBrokenLabel.setText("Total Broken: " + stats.numBrokenSamples());
+        _accuracyLabel.setText("Accuracy: " + stats.accuracy());
+        _precisionLabel.setText("Precision: " + Math.floor(stats.precision() * 1000) / 1000.0);
+        _recallLabel.setText("Recall: " + stats.recall());
+        _specificityLabel.setText("Specificity: " + stats.specificity());
         //fbs.setText("F-beta Score: " + stats.fBetaScore(/* beta */));
+        //#endregion
+
+        return stats;
     }
 
     /**

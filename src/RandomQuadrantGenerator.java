@@ -27,8 +27,8 @@ public class RandomQuadrantGenerator extends AbstractTargetGenerator{
         int count = 0;
 
         // Shift the pieces a small random offset
-        int xOff = (int) ((rng.nextDouble() - 0.5) * targetRadius);
-        int yOff = (int) ((rng.nextDouble() - 0.5) * targetRadius);
+        int xOff = (int) ((rng.nextDouble() - 0.5) * targetRadius * 2);
+        int yOff = (int) ((rng.nextDouble() - 0.5) * targetRadius * 2);
 
         for(int i = 0; i < numEdges; i++){
             int x = (int) (Math.cos(i * 2 * Math.PI / numEdges) * targetRadius);
@@ -49,8 +49,8 @@ public class RandomQuadrantGenerator extends AbstractTargetGenerator{
 
                 // Reset these values to make new piece
                 p = new Piece();
-                xOff = (int) ((rng.nextDouble() - 0.5) * targetRadius / 2);
-                yOff = (int) ((rng.nextDouble() - 0.5) * targetRadius / 2);
+                xOff = (int) ((rng.nextDouble() - 0.5) * targetRadius * 2);
+                yOff = (int) ((rng.nextDouble() - 0.5) * targetRadius * 2);
             }
         }
         // TODO add small scattered pieces for noise (make a separate class to extend with a noise function?)
@@ -60,7 +60,6 @@ public class RandomQuadrantGenerator extends AbstractTargetGenerator{
 
     /**
      * Gets the name that the listable object should be referred to as
-     *
      * @return the name of the object
      */
     @Override

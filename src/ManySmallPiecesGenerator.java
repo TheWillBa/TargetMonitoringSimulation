@@ -24,7 +24,7 @@ public class ManySmallPiecesGenerator extends AbstractTargetGenerator{
             int xC = r.nextInt(targetRadius * 4) - (targetRadius * 2); // can change constants here
             int yC = r.nextInt(targetRadius * 4) - (targetRadius * 2);
             int maxRadius = (int) (targetRadius * r.nextDouble() / 1.5);
-            int numSmallPoints = 5; // change later?
+            int numSmallPoints = 3; // change later?
 
             Piece p = new Piece();
             for(int j = 0; j < numSmallPoints; j++){
