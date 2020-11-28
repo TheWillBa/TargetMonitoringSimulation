@@ -1,6 +1,3 @@
-import com.sun.javaws.exceptions.InvalidArgumentException;
-import javafx.scene.control.ListView;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +18,9 @@ public class TesterMaster {
     private final Int _generatorIndex = new Int(0);
     private final Int _collectorIndex = new Int(0);
     private final Int _analyzerIndex = new Int(0);
+
+    private TestConfiguration mostRecentSingleTestResults = null;
+    private List<TestConfiguration> mostRecentBatchTestResult = null;
 
     public TesterMaster(){
     }
@@ -59,6 +59,10 @@ public class TesterMaster {
         LaserDataAnalyzer analyzer0 = new BasicLaserDataAnalyzer(_diameter._value, _spacing._value);
         analyzers.add(analyzer0);
 
+        LaserDataAnalyzer analyzer1 = new LengthHitLaserDataAnalyzer(_spacing._value, _diameter._value);
+        analyzers.add(analyzer1);
+
+
         // Add more options here
 
         return analyzers;
@@ -66,14 +70,18 @@ public class TesterMaster {
 
     public List<TestStatistics> runSimulationOverVariable(int min, int max, int step, Int var){
         List<TestStatistics> tests = new ArrayList<>();
+        List<TestConfiguration> results = new ArrayList<>();
         int origVal = var._value;
-        for(int i = min; i <= max; i++){
+        for(int i = min; i <= max; i += step){
             var._value = i;
             TestStatistics stats = runSimulation();
-            System.out.println(stats);
+            //System.out.println(stats);
             tests.add(stats);
+            //results.add(new TestConfiguration(stats, _diameter._value, _speed._value,
+            //        _numLasers._value, _numEdges._value, _spacing._value));
         }
         var._value = origVal;
+        mostRecentBatchTestResult = results;
         return tests;
     }
 /*
@@ -102,7 +110,11 @@ public class TesterMaster {
             throw new IllegalArgumentException("Index out of bounds");
         }
 
-        return tester.test(_whole._value, _broken._value);
+        TestStatistics stats =  tester.test(_whole._value, _broken._value);
+
+        //mostRecentSingleTestResults = new TestConfiguration(stats, _diameter._value, _speed._value,
+        //        _numLasers._value, _numEdges._value, _spacing._value);
+        return stats;
     }
 
 

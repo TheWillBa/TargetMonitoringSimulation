@@ -58,4 +58,8 @@ public abstract class AbstractTargetGenerator implements TargetGenerator{
     public Target getBrokenTarget(){
         return getBrokenTarget(0,0);
     }
+
+    protected static void addNoise(Target t){
+        // Add some noise pieces to the given target
+    }
 }

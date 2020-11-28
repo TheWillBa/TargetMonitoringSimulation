@@ -1,44 +1,45 @@
-/**
- * A data analyzer the uses the first algorithm developed during the original provide;
- * aka, checks for a broken target by assuring that the target hits only a certain number of
- * consecutive lasers
- */
-public class BasicLaserDataAnalyzer extends AbstractLaserDataAnalyzer{
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
-    public BasicLaserDataAnalyzer(int targetDiameter, int spacing){
+import java.util.Arrays;
+
+public class LengthHitLaserDataAnalyzer extends AbstractLaserDataAnalyzer{
+    public LengthHitLaserDataAnalyzer(int spacing, int targetDiameter) {
         super(spacing, targetDiameter);
     }
 
     /**
-     * Classifies breakage by checking if only three consecutive lasers were hit
+     * Returns true if the data represents a broken target
+     *
      * @param data the data collected from a simulated target drop
-     * @return true if broken, else false
+     * @return true if the data represents a broken target, false if not
      */
     @Override
     public boolean isBroken(boolean[][] data) {
         int numLasers = data[0].length;
         int GOAL_HITS_1 = requiredNumHitLasers(targetDiameter, laserSpacing, numLasers);
-        GOAL_HITS_1 = Math.min(GOAL_HITS_1, numLasers);
-        //final int GOAL_HITS_2 = GOAL_HITS_1 - 1;
-
 
         int[] lasersHitState = new int[numLasers];
 
         for (boolean[] row : data) {
             for (int j = 0; j < row.length; j++) {
                 if (row[j]) {
-                    lasersHitState[j] = 1;
+                    lasersHitState[j]++;
                 }
             }
         }
 
+        System.out.println(Arrays.toString(lasersHitState));
+
+        // Counts how many lasers were hit
+
         int lasersHitCount = 0;
         for(int state : lasersHitState){
-            lasersHitCount += state;
+            if(state > 0){
+                lasersHitCount++;
+            }
         }
 
-        //System.out.println(lasersHitCount);
-        if(lasersHitCount != GOAL_HITS_1/* && lasersHitCount != GOAL_HITS_2 */) return true;
+        if(lasersHitCount != GOAL_HITS_1) return true;
 
         // Check consecutive
 
@@ -51,17 +52,24 @@ public class BasicLaserDataAnalyzer extends AbstractLaserDataAnalyzer{
             }
         }
 
-        return checkConsecutive(lasersIndexesHit);
+        if (checkConsecutive(lasersIndexesHit)) return true;
 
+        int leftEdgeHits = lasersHitState[lasersIndexesHit[0]];
+        int middleHits = lasersHitState[lasersIndexesHit[1]];
+        int rightEdgeHits = lasersHitState[lasersIndexesHit[2]];
+
+        // Check for circle shape
+
+        return middleHits < leftEdgeHits || middleHits < rightEdgeHits;
     }
-
 
     /**
      * Gets the name that the listable object should be referred to as
+     *
      * @return the name of the object
      */
     @Override
     public String getName() {
-        return "Basic consecutive (v1.0)";
+        return "Time Hit (v1.1)";
     }
 }

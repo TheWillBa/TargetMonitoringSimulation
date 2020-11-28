@@ -319,7 +319,6 @@ public class SimulationApplicationGUI extends Application {
         primaryStage.show();
     }
 
-
     private static void displayDataGraph(int depMin, int depMax, List<TestStatistics> tests, String text, Stage parentStage){
         HBox secondaryLayout = new HBox();
         Scene secondScene = new Scene(secondaryLayout, 500, 500);

@@ -56,9 +56,15 @@ public abstract class AbstractLaserDataCollector implements LaserDataCollector {
      * @param y the offset on the y axis
      */
     private void initializeLasers(int x, int y){
-        for(int i = 0; i < numLasers; i++){
-            laserPoints[i] = new int[]{-spacing * (numLasers - (numLasers % 2))/2 + i * spacing + x,y};
-            //System.out.println("( " + laserPoints[i][0] + ", " + laserPoints[i][1] + ")");
+        if(numLasers % 2 == 1) {
+            for (int i = 0; i < numLasers; i++) {
+                laserPoints[i] = new int[]{-spacing * (numLasers - (numLasers % 2)) / 2 + i * spacing + x, y};
+            }
+        }
+        else{
+            for (int i = 0; i < numLasers; i++) {
+                laserPoints[i] = new int[]{-spacing * (numLasers - (numLasers % 2)) / 2 + i * spacing + x + spacing/2, y};
+            }
         }
     }
 
