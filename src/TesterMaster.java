@@ -1,3 +1,5 @@
+import com.sun.jmx.remote.util.OrderClassLoaders;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,6 +63,9 @@ public class TesterMaster {
 
         LaserDataAnalyzer analyzer1 = new LengthHitLaserDataAnalyzer(_spacing._value, _diameter._value);
         analyzers.add(analyzer1);
+
+        LaserDataAnalyzer analyzer2 = new HitOrderLaserDataAnalyzer(_spacing._value, _diameter._value);
+        analyzers.add(analyzer2);
 
 
         // Add more options here
