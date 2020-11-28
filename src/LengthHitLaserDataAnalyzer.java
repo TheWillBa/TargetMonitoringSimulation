@@ -28,7 +28,7 @@ public class LengthHitLaserDataAnalyzer extends AbstractLaserDataAnalyzer{
             }
         }
 
-        System.out.println(Arrays.toString(lasersHitState));
+        //System.out.println(Arrays.toString(lasersHitState));
 
         // Counts how many lasers were hit
 
@@ -54,13 +54,24 @@ public class LengthHitLaserDataAnalyzer extends AbstractLaserDataAnalyzer{
 
         if (checkConsecutive(lasersIndexesHit)) return true;
 
-        int leftEdgeHits = lasersHitState[lasersIndexesHit[0]];
-        int middleHits = lasersHitState[lasersIndexesHit[1]];
-        int rightEdgeHits = lasersHitState[lasersIndexesHit[2]];
+        if(numLasers % 2 == 1){
+            for(int i = 0; i < numLasers/2; i++){
+                if(lasersHitState[i] > lasersHitState[i+1]) return true;
+            }
+            for(int i = numLasers/2; i < numLasers-1; i++){
+                if(lasersHitState[i] < lasersHitState[i+1]) return true;
+            }
+        }
+        else{
+            for(int i = 0; i < numLasers/2 - 1; i++){
+                if(lasersHitState[i] > lasersHitState[i+1]) return true;
+            }
+            for(int i = numLasers/2 + 1; i < numLasers-1; i++){
+                if(lasersHitState[i] < lasersHitState[i+1]) return true;
+            }
+        }
 
-        // Check for circle shape
-
-        return middleHits < leftEdgeHits || middleHits < rightEdgeHits;
+        return false;
     }
 
     /**

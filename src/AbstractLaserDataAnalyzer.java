@@ -27,7 +27,7 @@ public abstract class AbstractLaserDataAnalyzer implements LaserDataAnalyzer{
                 max = 2 + 2 * (((diameter - spacing) / 2) / spacing);
             }
         }
-        System.out.println("MAX: " + max);
+        //System.out.println("MAX: " + max);
         return max;
     }
 
